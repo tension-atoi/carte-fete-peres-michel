@@ -279,8 +279,15 @@ class Component extends DCLogic {
     for (const b of this._blip) { const d = Math.hypot(mx - b.sx, my - b.sy); if (d < bd) { bd = d; best = b.i; } }
     this.hover = best; el.style.cursor = best !== null ? 'pointer' : 'default';
   };
-  onClickCanvas = () => {
-    if (this.hover !== null) { this.openAt(this.hover); return; }
+  onClickCanvas = (e) => {
+    // coordinate-based hit test so taps work on touch (where hover/mousemove doesn't fire)
+    let target = this.hover;
+    if (target === null && e && this.canvas) {
+      const r = this.canvas.getBoundingClientRect();
+      const mx = e.clientX - r.left, my = e.clientY - r.top; let bd = 36;
+      for (const b of this._blip) { const d = Math.hypot(mx - b.sx, my - b.sy); if (d < bd) { bd = d; target = b.i; } }
+    }
+    if (target !== null) { this.openAt(target); return; }
     if (this.live) { const t = performance.now() / 1000; this.contacts.forEach(c => { if (c.disc) c.pulseT = t; }); }
   };
 
